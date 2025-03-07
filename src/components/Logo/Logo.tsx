@@ -12,11 +12,15 @@ interface Props {
 export const Logo = (props: Props) => {
   const { loading: loadingFromProps, priority: priorityFromProps, className } = props
   const { theme } = useTheme()
-  const [logoSrc, setLogoSrc] = useState('/media/logo.svg')
+  // Use absolute URLs with the server URL to ensure logos work in production
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || ''
+  const [logoSrc, setLogoSrc] = useState(`${serverUrl}/media/logo.svg`)
 
   useEffect(() => {
-    setLogoSrc(theme === 'dark' ? '/media/logo_white.svg' : '/media/logo.svg')
-  }, [theme])
+    setLogoSrc(theme === 'dark' 
+      ? `${serverUrl}/media/logo_white.svg` 
+      : `${serverUrl}/media/logo.svg`)
+  }, [theme, serverUrl])
 
   const loading = loadingFromProps || 'lazy'
   const priority = priorityFromProps || 'low'
