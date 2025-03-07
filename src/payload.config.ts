@@ -1,4 +1,5 @@
-// storage-adapter-import-placeholder
+// Import Vercel Blob storage adapter for Media collection
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
 import sharp from 'sharp' // sharp-import
@@ -66,14 +67,37 @@ export default buildConfig({
       // In production, set DATABASE_URI in environment variables
       url: process.env.DATABASE_URI || 'file:./temp-build-database.db',
     },
+    // Skip database operations during build process to prevent errors
+    // This allows the build to complete without requiring actual database tables
+    ...(process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production'
+      ? {
+          migrationDir: path.resolve(__dirname, './migrations'),
+          // Only run migrations in actual deployment, not during build
+          runMigrations: false,
+        }
+      : {}),
   }),
   collections: [Pages, Posts, Media, Categories, Users, Scholarships],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
     ...plugins,
-    // storage-adapter-placeholder
-  ],
+    // Add Vercel Blob storage adapter for Media collection
+    // This is better integrated with Vercel deployments
+    vercelBlobStorage({
+      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN), // Only enable if token is available
+      collections: {
+        media: {
+          // Add a prefix to organize uploads in the blob storage
+          prefix: 'media',
+        },
+      },
+      // Token is automatically provided by Vercel when Blob storage is added to the project
+      token: process.env.BLOB_READ_WRITE_TOKEN || '',
+      // Enable client-side uploads to bypass Vercel's 4.5MB server upload limit
+      clientUploads: true,
+    }),
+  ].filter(Boolean),
   // Provide a fallback secret for build environments where env vars might not be set
   // In production, always set a proper PAYLOAD_SECRET in environment variables
   secret: process.env.PAYLOAD_SECRET || 'TEMPORARY_FALLBACK_SECRET_FOR_BUILD',
