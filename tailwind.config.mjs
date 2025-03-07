@@ -81,8 +81,8 @@ const config = {
           foreground: 'hsl(var(--popover-foreground))',
         },
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: '#74479c', // Updated primary color
+          foreground: '#ffffff',
         },
         ring: 'hsl(var(--ring))',
         secondary: {
@@ -92,10 +92,11 @@ const config = {
         success: 'hsl(var(--success))',
         error: 'hsl(var(--error))',
         warning: 'hsl(var(--warning))',
+        black: '#220a3d', // Updated to the requested color
       },
       fontFamily: {
         mono: ['var(--font-geist-mono)'],
-        sans: ['var(--font-geist-sans)'],
+        sans: ['commuters-sans', 'var(--font-geist-sans)'], // Added commuters-sans as primary font
       },
       keyframes: {
         'accordion-down': {

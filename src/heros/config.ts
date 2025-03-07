@@ -39,6 +39,22 @@ export const hero: Field = {
       required: true,
     },
     {
+      name: 'heading',
+      type: 'text',
+      label: 'Heading',
+      admin: {
+        condition: (_, { type } = {}) => type === 'highImpact',
+      },
+    },
+    {
+      name: 'subheading',
+      type: 'text',
+      label: 'Subheading',
+      admin: {
+        condition: (_, { type } = {}) => type === 'highImpact',
+      },
+    },
+    {
       name: 'richText',
       type: 'richText',
       editor: lexicalEditor({
@@ -58,15 +74,7 @@ export const hero: Field = {
         maxRows: 2,
       },
     }),
-    {
-      name: 'media',
-      type: 'upload',
-      admin: {
-        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
-      },
-      relationTo: 'media',
-      required: true,
-    },
+    // Media field removed
   ],
   label: false,
 }
