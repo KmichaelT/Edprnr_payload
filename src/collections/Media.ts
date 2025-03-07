@@ -39,8 +39,11 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload
+    // In development, upload to the public/media directory
+    // In production, the storage adapter will handle uploads
     staticDir: path.resolve(dirname, '../../public/media'),
+    // This helps prevent issues during build
+    disableLocalStorage: process.env.NODE_ENV === 'production',
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     imageSizes: [

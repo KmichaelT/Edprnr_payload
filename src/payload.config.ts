@@ -69,8 +69,11 @@ export default buildConfig({
     },
     // Skip database operations during build process to prevent errors
     // This allows the build to complete without requiring actual database tables
-    ...(process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production'
+    ...(process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production'
       ? {
+          // Set this to completely disable database operations during build
+          disableDB: process.env.VERCEL_ENV === 'preview',
+          // Migration directory for actual deployments
           migrationDir: path.resolve(__dirname, './migrations'),
           // Only run migrations in actual deployment, not during build
           runMigrations: false,
@@ -85,15 +88,18 @@ export default buildConfig({
     // Add Vercel Blob storage adapter for Media collection
     // This is better integrated with Vercel deployments
     vercelBlobStorage({
-      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN), // Only enable if token is available
+      // Only enable in production environments
+      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN || process.env.NODE_ENV === 'production'),
       collections: {
-        media: {
+        // Match the exact slug from the Media collection
+        'media': {
           // Add a prefix to organize uploads in the blob storage
           prefix: 'media',
         },
       },
       // Token is automatically provided by Vercel when Blob storage is added to the project
-      token: process.env.BLOB_READ_WRITE_TOKEN || '',
+      // For build time, provide a placeholder that will be replaced in actual deployment
+      token: process.env.BLOB_READ_WRITE_TOKEN || 'placeholder-for-build',
       // Enable client-side uploads to bypass Vercel's 4.5MB server upload limit
       clientUploads: true,
     }),
