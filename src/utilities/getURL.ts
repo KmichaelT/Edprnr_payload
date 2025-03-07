@@ -11,6 +11,11 @@ export const getServerSideURL = () => {
     url = 'http://localhost:3000'
   }
 
+  // Ensure URL has protocol
+  if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+    url = `https://${url}`
+  }
+
   return url
 }
 
@@ -27,5 +32,12 @@ export const getClientSideURL = () => {
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   }
 
-  return process.env.NEXT_PUBLIC_SERVER_URL || ''
+  let url = process.env.NEXT_PUBLIC_SERVER_URL || ''
+  
+  // Ensure URL has protocol if it exists
+  if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+    url = `https://${url}`
+  }
+
+  return url
 }
