@@ -42,8 +42,9 @@ export const Media: CollectionConfig = {
     // In development, upload to the public/media directory
     // In production, the storage adapter will handle uploads
     staticDir: path.resolve(dirname, '../../public/media'),
-    // This helps prevent issues during build
-    disableLocalStorage: process.env.NODE_ENV === 'production',
+    // Disable local storage when BLOB_READ_WRITE_TOKEN is available or in production
+    // This ensures we use the Vercel Blob storage adapter when deployed
+    disableLocalStorage: Boolean(process.env.BLOB_READ_WRITE_TOKEN) || process.env.NODE_ENV === 'production',
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     imageSizes: [

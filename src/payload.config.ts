@@ -87,22 +87,23 @@ export default buildConfig({
     ...plugins,
     // Add Vercel Blob storage adapter for Media collection
     // This is better integrated with Vercel deployments
-    vercelBlobStorage({
-      // Only enable in production environments
-      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN || process.env.NODE_ENV === 'production'),
-      collections: {
-        // Match the exact slug from the Media collection
-        'media': {
-          // Add a prefix to organize uploads in the blob storage
-          prefix: 'media',
+    ...(process.env.BLOB_READ_WRITE_TOKEN ? [
+      vercelBlobStorage({
+        // Only enable when token is available
+        enabled: true,
+        collections: {
+          // Match the exact slug from the Media collection
+          'media': {
+            // Add a prefix to organize uploads in the blob storage
+            prefix: 'media',
+          },
         },
-      },
-      // Token is automatically provided by Vercel when Blob storage is added to the project
-      // For build time, provide a placeholder that will be replaced in actual deployment
-      token: process.env.BLOB_READ_WRITE_TOKEN || 'placeholder-for-build',
-      // Enable client-side uploads to bypass Vercel's 4.5MB server upload limit
-      clientUploads: true,
-    }),
+        // Token is automatically provided by Vercel when Blob storage is added to the project
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+        // Enable client-side uploads to bypass Vercel's 4.5MB server upload limit
+        clientUploads: true,
+      }),
+    ] : []),
   ].filter(Boolean),
   // Provide a fallback secret for build environments where env vars might not be set
   // In production, always set a proper PAYLOAD_SECRET in environment variables
