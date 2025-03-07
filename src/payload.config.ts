@@ -62,7 +62,9 @@ export default buildConfig({
   editor: defaultLexical,
   db: sqliteAdapter({
     client: {
-      url: process.env.DATABASE_URI || '',
+      // Provide a fallback database path for build environments
+      // In production, set DATABASE_URI in environment variables
+      url: process.env.DATABASE_URI || 'file:./temp-build-database.db',
     },
   }),
   collections: [Pages, Posts, Media, Categories, Users, Scholarships],
