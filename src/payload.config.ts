@@ -1,8 +1,6 @@
 // Import Vercel Blob storage adapter for Media collection
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { postgresAdapter } from '@payloadcms/db-postgres'
-// Keep SQLite import for local development fallback
-import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
 import sharp from 'sharp' // sharp-import
 import path from 'path'
@@ -63,29 +61,13 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  // For build process, completely disable database operations
-  // This prevents any database queries during static generation
-  db: process.env.PAYLOAD_DISABLE_DB === 'true'
-    ? sqliteAdapter({
-        // Use in-memory SQLite for build process
-        filename: ':memory:',
-      })
-    : process.env.DATABASE_URL
-      ? postgresAdapter({
-          // Use Postgres in production with Neon database
-          pool: {
-            connectionString: process.env.DATABASE_URL,
-            ssl: process.env.NODE_ENV === 'production',
-            max: 10, // Maximum number of connections in the pool
-          },
-          migrationDir: path.resolve(__dirname, './migrations'),
-        })
-      : sqliteAdapter({
-          // Fallback to SQLite for local development
-          client: {
-            url: process.env.DATABASE_URI || 'file:./local-development.db',
-          },
-        }),
+  // Database configuration
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production',
+    },
+  }),
   collections: [Pages, Posts, Media, Categories, Users, Scholarships],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],

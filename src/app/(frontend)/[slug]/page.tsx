@@ -15,7 +15,8 @@ import { LivePreviewListener } from '@/components/LivePreviewListener'
 
 export async function generateStaticParams() {
   // Skip database queries during build process
-  if (process.env.PAYLOAD_DISABLE_DB === 'true' || process.env.SKIP_DATABASE_GENERATION === 'true') {
+  if (process.env.NEXT_PUBLIC_SKIP_DATABASE_GENERATION === 'true') {
+    // Return empty array during build
     return []
   }
   

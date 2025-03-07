@@ -71,7 +71,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 
 export async function generateStaticParams() {
   // Skip database queries during build process
-  if (process.env.PAYLOAD_DISABLE_DB === 'true' || process.env.SKIP_DATABASE_GENERATION === 'true') {
+  if (process.env.NEXT_PUBLIC_SKIP_DATABASE_GENERATION === 'true') {
     // Return just the first page during build
     return [{ pageNumber: '1' }]
   }
