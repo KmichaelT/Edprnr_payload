@@ -72,7 +72,9 @@ export default buildConfig({
     ...plugins,
     // storage-adapter-placeholder
   ],
-  secret: process.env.PAYLOAD_SECRET,
+  // Provide a fallback secret for build environments where env vars might not be set
+  // In production, always set a proper PAYLOAD_SECRET in environment variables
+  secret: process.env.PAYLOAD_SECRET || 'TEMPORARY_FALLBACK_SECRET_FOR_BUILD',
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
