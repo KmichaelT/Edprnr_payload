@@ -70,19 +70,31 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 }
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const { totalDocs } = await payload.count({
-    collection: 'posts',
-    overrideAccess: false,
-  })
-
-  const totalPages = Math.ceil(totalDocs / 10)
-
-  const pages: { pageNumber: string }[] = []
-
-  for (let i = 1; i <= totalPages; i++) {
-    pages.push({ pageNumber: String(i) })
+  // Skip database queries during build process
+  if (process.env.PAYLOAD_DISABLE_DB === 'true' || process.env.SKIP_DATABASE_GENERATION === 'true') {
+    // Return just the first page during build
+    return [{ pageNumber: '1' }]
   }
+  
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const { totalDocs } = await payload.count({
+      collection: 'posts',
+      overrideAccess: false,
+    })
 
-  return pages
+    const totalPages = Math.ceil(totalDocs / 10)
+
+    const pages: { pageNumber: string }[] = []
+
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push({ pageNumber: String(i) })
+    }
+    
+    return pages
+  } catch (error) {
+    console.error('Error generating pagination params:', error)
+    // Return just the first page if there's an error
+    return [{ pageNumber: '1' }]
+  }
 }

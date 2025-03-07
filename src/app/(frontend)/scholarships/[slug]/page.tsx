@@ -12,23 +12,33 @@ import ScholarshipDetailClient from './page.client'
 import type { Scholarship } from '@/payload-types'
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const scholarships = await payload.find({
-    collection: 'scholarships',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-    pagination: false,
-    select: {
-      slug: true,
-    },
-  })
+  // Skip database queries during build process
+  if (process.env.PAYLOAD_DISABLE_DB === 'true' || process.env.SKIP_DATABASE_GENERATION === 'true') {
+    return []
+  }
+  
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const scholarships = await payload.find({
+      collection: 'scholarships',
+      draft: false,
+      limit: 1000,
+      overrideAccess: false,
+      pagination: false,
+      select: {
+        slug: true,
+      },
+    })
 
-  const params = scholarships.docs.map(({ slug }) => {
-    return { slug }
-  })
+    const params = scholarships.docs.map(({ slug }) => {
+      return { slug }
+    })
 
-  return params
+    return params
+  } catch (error) {
+    console.error('Error generating scholarship params:', error)
+    return []
+  }
 }
 
 type Args = {

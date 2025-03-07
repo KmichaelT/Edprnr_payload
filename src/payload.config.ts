@@ -63,32 +63,45 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  db: process.env.DATABASE_URL
-    ? postgresAdapter({
-        // Use Postgres in production with Neon database
-        pool: {
-          connectionString: process.env.DATABASE_URL,
-          ssl: process.env.NODE_ENV === 'production',
-          max: 10, // Maximum number of connections in the pool
-        },
-        // Skip database operations during build process to prevent errors
-        ...(process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview' || process.env.NODE_ENV === 'production'
-          ? {
-              // Set this to completely disable database operations during build
-              disableDB: process.env.PAYLOAD_DISABLE_DB === 'true',
-              // Migration directory for actual deployments
-              migrationDir: path.resolve(__dirname, './migrations'),
-              // Only run migrations in actual deployment, not during build
-              runMigrations: false,
-            }
-          : {}),
-      })
-    : sqliteAdapter({
-        // Fallback to SQLite for local development
-        client: {
-          url: process.env.DATABASE_URI || 'file:./local-development.db',
-        },
-      }),
+  // For build process, completely disable database operations
+  // This prevents any database queries during static generation
+  db: process.env.PAYLOAD_DISABLE_DB === 'true'
+    ? {
+        // Mock adapter for build process
+        name: 'mock',
+        // These methods will be called but won't do anything
+        async connect() { return },
+        async disconnect() { return },
+        async migrate() { return },
+        // Return empty arrays for any queries
+        async find() { return { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasPrevPage: false, hasNextPage: false } },
+        async findOne() { return null },
+        async create() { return {} },
+        async createGlobal() { return {} },
+        async findGlobal() { return {} },
+        async updateGlobal() { return {} },
+        async deleteMany() { return {} },
+        async update() { return {} },
+        async delete() { return {} },
+      }
+    : process.env.DATABASE_URL
+      ? postgresAdapter({
+          // Use Postgres in production with Neon database
+          pool: {
+            connectionString: process.env.DATABASE_URL,
+            ssl: process.env.NODE_ENV === 'production',
+            max: 10, // Maximum number of connections in the pool
+          },
+          migrationDir: path.resolve(__dirname, './migrations'),
+          // Only run migrations in actual deployment, not during build
+          runMigrations: process.env.VERCEL_ENV !== 'preview',
+        })
+      : sqliteAdapter({
+          // Fallback to SQLite for local development
+          client: {
+            url: process.env.DATABASE_URI || 'file:./local-development.db',
+          },
+        }),
   collections: [Pages, Posts, Media, Categories, Users, Scholarships],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
