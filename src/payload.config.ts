@@ -68,7 +68,6 @@ export default buildConfig({
   db: process.env.PAYLOAD_DISABLE_DB === 'true'
     ? sqliteAdapter({
         // Use in-memory SQLite for build process
-        client: 'better-sqlite3',
         filename: ':memory:',
       })
     : process.env.DATABASE_URL
