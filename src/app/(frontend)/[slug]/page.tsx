@@ -35,12 +35,16 @@ export async function generateStaticParams() {
     const params = pages.docs
       ?.filter((doc) => {
         return doc.slug !== 'home'
-    })
-    .map(({ slug }) => {
-      return { slug }
-    })
+      })
+      .map(({ slug }) => {
+        return { slug }
+      })
 
-  return params
+    return params
+  } catch (error) {
+    console.error('Error generating page params:', error)
+    return []
+  }
 }
 
 type Args = {

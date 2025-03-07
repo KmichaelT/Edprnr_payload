@@ -66,24 +66,11 @@ export default buildConfig({
   // For build process, completely disable database operations
   // This prevents any database queries during static generation
   db: process.env.PAYLOAD_DISABLE_DB === 'true'
-    ? {
-        // Mock adapter for build process
-        name: 'mock',
-        // These methods will be called but won't do anything
-        async connect() { return },
-        async disconnect() { return },
-        async migrate() { return },
-        // Return empty arrays for any queries
-        async find() { return { docs: [], totalDocs: 0, totalPages: 0, page: 1, hasPrevPage: false, hasNextPage: false } },
-        async findOne() { return null },
-        async create() { return {} },
-        async createGlobal() { return {} },
-        async findGlobal() { return {} },
-        async updateGlobal() { return {} },
-        async deleteMany() { return {} },
-        async update() { return {} },
-        async delete() { return {} },
-      }
+    ? sqliteAdapter({
+        // Use in-memory SQLite for build process
+        client: 'better-sqlite3',
+        filename: ':memory:',
+      })
     : process.env.DATABASE_URL
       ? postgresAdapter({
           // Use Postgres in production with Neon database
@@ -93,8 +80,6 @@ export default buildConfig({
             max: 10, // Maximum number of connections in the pool
           },
           migrationDir: path.resolve(__dirname, './migrations'),
-          // Only run migrations in actual deployment, not during build
-          runMigrations: process.env.VERCEL_ENV !== 'preview',
         })
       : sqliteAdapter({
           // Fallback to SQLite for local development
