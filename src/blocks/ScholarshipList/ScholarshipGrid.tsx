@@ -42,13 +42,9 @@ export interface ScholarshipItem {
 
 interface ScholarshipGridProps {
   scholarships: ScholarshipItem[]
-  heading?: string
 }
 
-export const ScholarshipGrid: React.FC<ScholarshipGridProps> = ({
-  heading = 'Scholarships',
-  scholarships = [],
-}) => {
+export const ScholarshipGrid: React.FC<ScholarshipGridProps> = ({ scholarships = [] }) => {
   // Extract unique award types and categories for filters
   const uniqueAwards = useMemo(
     () => [...new Set(scholarships.map((item) => item.awardAmount))],
